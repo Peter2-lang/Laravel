@@ -1,0 +1,227 @@
+/* --- BASE STYLES --- */
+:root {
+  --bg-color: #f6f1e9;
+  --stone-50: #fafaf9;
+  --stone-100: #f5f5f4;
+  --stone-200: #e7e5e4;
+  --stone-300: #d6d3d1;
+  --stone-400: #a8a29e;
+  --stone-500: #78716c;
+  --stone-600: #57534e;
+  --stone-700: #44403c;
+  --stone-900: #1c1917;
+  --stone-950: #0c0a09;
+  --amber-700: #b45309;
+  --amber-800: #92400e;
+  --amber-900: #78350f;
+  --rose-50: #fff1f2;
+  --rose-100: #ffe4e6;
+  --rose-200: #fecdd3;
+  --rose-700: #be123c;
+  --emerald-50: #ecfdf5;
+  --emerald-200: #a7f3d0;
+  --emerald-700: #047857;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-color);
+  color: var(--stone-950);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* --- COMPONENTS --- */
+
+/* Input Fields */
+.input {
+  width: 100%;
+  border-radius: 1rem; /* 16px */
+  border: 1px solid var(--stone-200);
+  background-color: white;
+  padding: 0.75rem 1rem;
+  color: var(--stone-950);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.input::placeholder {
+  color: var(--stone-400);
+}
+
+.input:focus {
+  border-color: var(--amber-700);
+  box-shadow: 0 0 0 4px rgba(180, 83, 9, 0.1);
+}
+
+/* Primary Button */
+.btn-primary {
+  display: inline-block;
+  border-radius: 1rem;
+  background-color: var(--stone-950);
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+  color: white;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  background-color: var(--amber-800);
+}
+
+.btn-primary:focus {
+  box-shadow: 0 0 0 4px rgba(12, 10, 9, 0.15);
+}
+
+/* Secondary Button */
+.btn-secondary {
+  display: inline-block;
+  border-radius: 1rem;
+  border: 1px solid var(--stone-300);
+  background-color: white;
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+  color: var(--stone-900);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  transform: translateY(-2px);
+  border-color: var(--amber-800);
+  color: var(--amber-900);
+}
+
+/* Compact Buttons */
+.btn-compact {
+  border-radius: 9999px;
+  background-color: var(--stone-950);
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-compact:hover {
+  background-color: var(--amber-800);
+}
+
+.btn-compact-light {
+  border-radius: 9999px;
+  border: 1px solid var(--stone-200);
+  background-color: white;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--stone-700);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-compact-light:hover {
+  border-color: var(--stone-900);
+  color: var(--stone-950);
+}
+
+/* Danger Button */
+.btn-danger {
+  border-radius: 9999px;
+  border: 1px solid var(--rose-200);
+  background-color: var(--rose-50);
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--rose-700);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-danger:hover {
+  border-color: var(--rose-700);
+  background-color: var(--rose-100);
+}
+
+/* --- ANIMATIONS --- */
+
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes house-drift {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(18px); }
+}
+
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-reveal { animation: reveal 0.8s ease both; }
+.animate-float-slow { animation: float-slow 6s ease-in-out infinite; }
+.animate-house-drift { animation: house-drift 12s ease-in-out infinite; transform-origin: center; }
+.animate-page-in { animation: page-in 0.45s ease both; }
+.animate-rise { animation: rise 0.55s ease both; }
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --- PRINT STYLES --- */
+@media print {
+  @page { margin: 0.5in; }
+  body { background: white !important; }
+  .no-print, aside, nav, .btn-primary, .btn-secondary { display: none !important; }
+  .print-area { display: block !important; width: 100%; }
+  .app-shell { display: none !important; }
+}
+
+/* --- LAYOUT UTILITIES (Tailwind Replacements) --- */
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+}
+
+.panel {
+  background-color: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 2rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.metric-card {
+  padding: 1.25rem;
+  border-radius: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background-color: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
