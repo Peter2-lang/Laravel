@@ -1,151 +1,176 @@
-<?php
-session_start();
-
-// --- DATABASE CONFIGURATION ---
-$db_file = 'boarding_house.db';
-try {
-    $pdo = new PDO("sqlite:$db_file");
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
-}
-
-// --- DATABASE INITIALIZATION (CREATE TABLES) ---
-$pdo->exec("CREATE TABLE IF NOT EXISTS property (id INTEGER PRIMARY KEY, name TEXT, address TEXT, manager TEXT, phone TEXT, notes TEXT)");
-$pdo->exec("CREATE TABLE IF NOT EXISTS rooms (id INTEGER PRIMARY KEY, name TEXT, type TEXT, monthly_rate REAL, capacity INTEGER, status TEXT)");
-$pdo->exec("CREATE TABLE IF NOT EXISTS tenants (id INTEGER PRIMARY KEY, name TEXT, email TEXT, phone TEXT, room_id INTEGER, start_date TEXT, monthly_rent REAL, account_id INTEGER)");
-$pdo->exec("CREATE TABLE IF NOT EXISTS accounts (id INTEGER PRIMARY KEY, role TEXT, username TEXT, password TEXT, tenant_id INTEGER)");
-$pdo->exec("CREATE TABLE IF NOT EXISTS payments (id INTEGER PRIMARY KEY, tenant_id INTEGER, amount REAL, method TEXT, reference TEXT, date TEXT, status TEXT)");
-$pdo->exec("CREATE TABLE IF NOT EXISTS reports (id INTEGER PRIMARY KEY, tenant_id INTEGER, category TEXT, title TEXT, details TEXT, date TEXT, status TEXT)");
-$pdo->exec("CREATE TABLE IF NOT EXISTS schedules (id INTEGER PRIMARY KEY, title TEXT, date TEXT, time TEXT, category TEXT, details TEXT, visible_to_tenants INTEGER)");
-
-// SEED INITIAL DATA (If empty)
-$stmt = $pdo->query("SELECT COUNT(*) FROM accounts");
-if ($stmt->fetchColumn() == 0) {
-    $pdo->exec("INSERT INTO property (name, address, manager, phone, notes) VALUES ('Madaje\'s Boarding House', 'San Pedro Street, Hinunangan Southern Leyte', 'Roberto Madaje Jr.', '09123456789', 'Quiet and clean.')");
-    $pdo->exec("INSERT INTO accounts (role, username, password) VALUES ('admin', 'admin', 'admin123')");
-    $pdo->exec("INSERT INTO rooms (name, type, monthly_rate, capacity, status) VALUES ('Room 101', 'Solo', 4500, 1, 'Available'), ('Room 102', 'Double', 3800, 2, 'Available')");
-}
-
-// --- HELPER FUNCTIONS ---
-function formatMoney($val) { return "PHP " . number_format($val, 2); }
-function formatDate($val) { return date("M d, Y", strtotime($val)); }
-
-function getBillingMonths($startDate) {
-    $start = new DateTime($startDate);
-    $now = new DateTime();
-    $diff = $start->diff($now);
-    $months = ($diff->y * 12) + $diff->m;
-    if ($now->format('d') >= $start->format('d')) $months++;
-    return max(1, $months);
-}
-
-// --- HANDLE POST ACTIONS ---
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['action'])) {
-        switch ($_POST['action']) {
-            case 'login':
-                $stmt = $pdo->prepare("SELECT * FROM accounts WHERE username = ? AND password = ?");
-                $stmt->execute([$_POST['username'], $_POST['password']]);
-                $user = $stmt->fetch(PDO::FETCH_ASSOC);
-                if ($user) {
-                    $_SESSION['user_id'] = $user['id'];
-                    $_SESSION['role'] = $user['role'];
-                } else {
-                    $login_error = "Invalid credentials.";
-                }
-                break;
-
-            case 'logout':
-                session_destroy();
-                header("Location: index.php");
-                exit;
-
-            case 'add_tenant':
-                $pdo->prepare("INSERT INTO tenants (name, email, phone, room_id, start_date, monthly_rent) VALUES (?, ?, ?, ?, ?, ?)")
-                    ->execute([$_POST['name'], $_POST['email'], $_POST['phone'], $_POST['room_id'], $_POST['start_date'], $_POST['monthly_rent']]);
-                $pdo->prepare("UPDATE rooms SET status = 'Occupied' WHERE id = ?")->execute([$_POST['room_id']]);
-                break;
-
-            case 'add_payment':
-                $pdo->prepare("INSERT INTO payments (tenant_id, amount, method, reference, date, status) VALUES (?, ?, ?, ?, ?, ?)")
-                    ->execute([$_POST['tenant_id'], $_POST['amount'], $_POST['method'], $_POST['reference'], date('Y-m-d'), 'Pending']);
-                break;
-            
-            case 'verify_payment':
-                $pdo->prepare("UPDATE payments SET status = 'Verified' WHERE id = ?")->execute([$_POST['id']]);
-                break;
-
-            case 'add_report':
-                $pdo->prepare("INSERT INTO reports (tenant_id, category, title, details, date, status) VALUES (?, ?, ?, ?, ?, ?)")
-                    ->execute([$_POST['tenant_id'], $_POST['category'], $_POST['title'], $_POST['details'], date('Y-m-d'), 'Open']);
-                break;
-        }
-        if (!isset($login_error)) { header("Location: index.php"); exit; }
-    }
-}
-
-// --- DATA FETCHING ---
-$property = $pdo->query("SELECT * FROM property LIMIT 1")->fetch(PDO::FETCH_ASSOC);
-$user = null;
-$tenant = null;
-if (isset($_SESSION['user_id'])) {
-    $stmt = $pdo->prepare("SELECT * FROM accounts WHERE id = ?");
-    $stmt->execute([$_SESSION['user_id']]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($user['role'] === 'tenant') {
-        $stmt = $pdo->prepare("SELECT * FROM tenants WHERE id = ?");
-        $stmt->execute([$user['tenant_id']]);
-        $tenant = $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-}
-
-$rooms = $pdo->query("SELECT * FROM rooms")->fetchAll(PDO::FETCH_ASSOC);
-$tenants = $pdo->query("SELECT * FROM tenants")->fetchAll(PDO::FETCH_ASSOC);
-$payments = $pdo->query("SELECT p.*, t.name as tenant_name FROM payments p JOIN tenants t ON p.tenant_id = t.id ORDER BY date DESC")->fetchAll(PDO::FETCH_ASSOC);
-$reports = $pdo->query("SELECT r.*, t.name as tenant_name FROM reports r JOIN tenants t ON r.tenant_id = t.id ORDER BY date DESC")->fetchAll(PDO::FETCH_ASSOC);
-
-$page = $_GET['tab'] ?? 'Overview';
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $property['name']; ?></title>
+    <title>Madaje's Boarding House</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f7efe3; color: #1c1917; }
-        .btn-primary { @apply bg-stone-950 text-white px-5 py-2.5 rounded-2xl font-semibold hover:bg-amber-800 transition; }
-        .input { @apply w-full rounded-2xl border border-stone-200 bg-white px-4 py-2.5 outline-none focus:ring-4 focus:ring-amber-700/10; }
-        @media print { .no-print { display: none; } .print-only { display: block !important; } }
+        /* --- YOUR CUSTOM CSS --- */
+        @layer base {
+            html { scroll-behavior: smooth; }
+            body { margin: 0; background: #f6f1e9; }
+        }
+        @layer components {
+            .input { @apply w-full rounded-2xl border border-stone-200 bg-white px-4 py-3 text-stone-950 outline-none transition placeholder:text-stone-400 focus:border-amber-700 focus:ring-4 focus:ring-amber-700/10; }
+            .btn-primary { @apply rounded-2xl bg-stone-950 px-5 py-3 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-amber-800 focus:outline-none focus:ring-4 focus:ring-stone-950/15; }
+            .btn-secondary { @apply rounded-2xl border border-stone-300 bg-white px-5 py-3 font-semibold text-stone-900 transition hover:-translate-y-0.5 hover:border-amber-800 hover:text-amber-900 focus:outline-none focus:ring-4 focus:ring-amber-700/10; }
+            .btn-compact { @apply rounded-full bg-stone-950 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-amber-800 focus:outline-none focus:ring-4 focus:ring-stone-950/10; }
+            .btn-compact-light { @apply rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-semibold text-stone-700 transition hover:border-stone-900 hover:text-stone-950 focus:outline-none focus:ring-4 focus:ring-stone-950/10; }
+            .btn-danger { @apply rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 transition hover:border-rose-700 hover:bg-rose-100 focus:outline-none focus:ring-4 focus:ring-rose-700/10; }
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes reveal { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes float-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes house-drift { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(18px); } }
+        .animate-reveal { animation: reveal 0.8s ease both; }
+        .animate-float-slow { animation: float-slow 6s ease-in-out infinite; }
+        .animate-house-drift { animation: house-drift 12s ease-in-out infinite; transform-origin: center; }
+
+        [v-cloak] { display: none; }
     </style>
 </head>
-<body class="min-h-screen">
+<body>
 
-<?php if (!$user): ?>
-    <!-- LOGIN VIEW -->
-    <div class="flex items-center justify-center min-h-screen p-6">
-        <div class="w-full max-w-md bg-white/80 backdrop-blur-xl p-8 rounded-[2.5rem] shadow-2xl border border-white">
-            <h1 class="text-3xl font-black mb-2"><?php echo $property['name']; ?></h1>
-            <p class="text-stone-500 mb-6">Secure Portal Access</p>
+<div id="app" v-cloak>
+    <!-- LOGIN PAGE -->
+    <div v-if="!session" class="min-h-screen relative overflow-hidden bg-[#f7efe3]">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(132,86,40,0.18),transparent_30%),linear-gradient(135deg,#fbf4e8_0%,#f7efe3_45%,#e7d1b3_100%)]"></div>
+        
+        <!-- House Scene -->
+        <div class="pointer-events-none absolute inset-x-0 bottom-0 h-[56vh] opacity-80">
+            <svg class="h-full w-full" viewBox="0 0 1200 520" preserveAspectRatio="xMidYMax slice">
+                <path d="M0 400 C180 340 240 405 410 350 C570 300 710 355 850 318 C1010 276 1090 312 1200 250 L1200 520 L0 520 Z" fill="#d7b98d" opacity="0.45" />
+                <g class="animate-house-drift" fill="#8a5a2b28" stroke="#3f2f22" stroke-opacity="0.28" stroke-width="3">
+                    <path d="M715 170 L960 250 L960 505 L555 505 L555 245 Z" />
+                    <path d="M280 275 H555 V505 H280 Z" />
+                </g>
+            </svg>
+        </div>
+
+        <div class="relative grid min-h-screen lg:grid-cols-[1.2fr_0.8fr]">
+            <section class="flex flex-col justify-between px-6 py-8 sm:px-10 lg:px-16">
+                <div class="animate-reveal flex items-center gap-3">
+                    <div class="grid h-12 w-12 place-items-center rounded-full border border-stone-900/15 bg-white/55 font-black backdrop-blur">MB</div>
+                    <p class="text-lg font-semibold">Madaje's Boarding House</p>
+                </div>
+                <div>
+                    <h1 class="animate-reveal text-6xl font-black leading-[0.9] tracking-[-0.08em] sm:text-8xl">The Rental<br>Portal.</h1>
+                    <p class="animate-reveal mt-6 max-w-2xl text-lg text-stone-700">A static-safe portal for room management and tenant tracking.</p>
+                </div>
+                <div class="animate-reveal text-sm text-stone-700">Static Portal • Runs on GitHub Pages</div>
+            </section>
+
+            <section class="flex items-center justify-center bg-white/55 px-6 py-10 backdrop-blur-xl lg:px-10">
+                <div class="animate-float-slow w-full max-w-md rounded-[2rem] border border-white/70 bg-white/85 p-8 shadow-2xl">
+                    <h2 class="text-3xl font-bold mb-6">Sign In</h2>
+                    <div class="space-y-4">
+                        <input v-model="loginForm.user" type="text" placeholder="Username" class="input">
+                        <input v-model="loginForm.pass" type="password" placeholder="Password" class="input">
+                        <button @click="login" class="btn-primary w-full">Open Dashboard</button>
+                        <p class="text-xs text-center text-stone-500">Demo: admin / admin123</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD -->
+    <div v-else class="flex min-h-screen bg-[#f6f1e9]">
+        <!-- Sidebar -->
+        <aside class="w-72 bg-white/50 border-r border-stone-200 p-6 hidden lg:block">
+            <div class="bg-stone-950 p-6 rounded-[2rem] text-white mb-8">
+                <p class="text-[10px] tracking-widest opacity-50 uppercase">Admin Portal</p>
+                <h2 class="text-xl font-bold mt-2">Madaje's</h2>
+            </div>
+            <nav class="space-y-2">
+                <button v-for="tab in ['Overview', 'Rooms', 'Tenants']" 
+                        @click="activeTab = tab"
+                        :class="activeTab === tab ? 'bg-amber-800 text-white shadow-lg' : 'text-stone-600 hover:bg-white'"
+                        class="w-full text-left px-5 py-3 rounded-2xl font-semibold transition">
+                    {{ tab }}
+                </button>
+                <button @click="logout" class="w-full text-left px-5 py-3 rounded-2xl font-semibold text-rose-600 hover:bg-rose-50">Logout</button>
+            </nav>
+        </aside>
+
+        <!-- Content -->
+        <main class="flex-1 p-6 lg:p-10">
+            <header class="mb-10">
+                <h1 class="text-4xl font-black">{{ activeTab }}</h1>
+            </header>
+
+            <!-- Overview -->
+            <div v-if="activeTab === 'Overview'" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-8 rounded-[2rem] shadow-sm">
+                    <p class="text-stone-500 font-semibold">Total Rooms</p>
+                    <p class="text-4xl font-black mt-2">{{ rooms.length }}</p>
+                </div>
+                <div class="bg-white p-8 rounded-[2rem] shadow-sm">
+                    <p class="text-stone-500 font-semibold">Tenants</p>
+                    <p class="text-4xl font-black mt-2">{{ tenants.length }}</p>
+                </div>
+            </div>
+
+            <!-- Rooms -->
+            <div v-if="activeTab === 'Rooms'" class="space-y-6">
+                <div class="bg-white p-8 rounded-[2rem] shadow-sm">
+                    <h3 class="text-xl font-bold mb-4">Add Room</h3>
+                    <div class="flex gap-4">
+                        <input v-model="newRoom.name" placeholder="Room Name" class="input">
+                        <input v-model="newRoom.rate" placeholder="Rate" class="input">
+                        <button @click="addRoom" class="btn-primary">Add</button>
+                    </div>
+                </div>
+                <div class="grid gap-4">
+                    <div v-for="room in rooms" class="bg-white/70 p-4 rounded-2xl border border-stone-200 flex justify-between">
+                        <span class="font-bold">{{ room.name }}</span>
+                        <span class="text-stone-500">PHP {{ room.rate }}</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script>
+    const { createApp, ref, onMounted } = Vue;
+
+    createApp({
+        setup() {
+            const session = ref(false);
+            const activeTab = ref('Overview');
+            const loginForm = ref({ user: 'admin', pass: 'admin123' });
             
-            <?php if (isset($login_error)): ?>
-                <div class="bg-rose-50 text-rose-700 p-4 rounded-2xl mb-4 text-sm"><?php echo $login_error; ?></div>
-            <?php endif; ?>
+            const rooms = ref(JSON.parse(localStorage.getItem('rooms') || '[]'));
+            const tenants = ref(JSON.parse(localStorage.getItem('tenants') || '[]'));
+            const newRoom = ref({ name: '', rate: '' });
 
-            <form method="POST" class="space-y-4">
-                <input type="hidden" name="action" value="login">
-                <div>
-                    <label class="text-sm font-semibold block mb-1">Username</label>
-                    <input type="text" name="username" class="input" required>
-                </div>
-                <div>
-                    <label class="text-sm font-semibold block mb-1">Password</label>
-                    <input type="password" name="password" class="input" required>
-                </div>
+            const login = () => {
+                if(loginForm.value.user === 'admin' && loginForm.value.pass === 'admin123') {
+                    session.value = true;
+                } else {
+                    alert('Invalid credentials');
+                }
+            };
+
+            const logout = () => { session.value = false; };
+
+            const addRoom = () => {
+                rooms.value.push({...newRoom.value});
+                localStorage.setItem('rooms', JSON.stringify(rooms.value));
+                newRoom.value = { name: '', rate: '' };
+            };
+
+            return { session, activeTab, loginForm, rooms, tenants, newRoom, login, logout, addRoom };
+        }
+    }).mount('#app');
+</script>
+
+</body>
+</html>                </div>
                 <button type="submit" class="btn-primary w-full py-4 text-lg">Sign In</button>
             </form>
             <div class="mt-6 text-xs text-stone-400 text-center">
