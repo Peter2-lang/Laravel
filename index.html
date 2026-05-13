@@ -5,361 +5,1274 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Madaje's Boarding House</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* --- YOUR CUSTOM CSS --- */
-        @layer base {
-            html { scroll-behavior: smooth; }
-            body { margin: 0; background: #f6f1e9; }
-        }
-        @layer components {
-            .input { @apply w-full rounded-2xl border border-stone-200 bg-white px-4 py-3 text-stone-950 outline-none transition placeholder:text-stone-400 focus:border-amber-700 focus:ring-4 focus:ring-amber-700/10; }
-            .btn-primary { @apply rounded-2xl bg-stone-950 px-5 py-3 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-amber-800 focus:outline-none focus:ring-4 focus:ring-stone-950/15; }
-            .btn-secondary { @apply rounded-2xl border border-stone-300 bg-white px-5 py-3 font-semibold text-stone-900 transition hover:-translate-y-0.5 hover:border-amber-800 hover:text-amber-900 focus:outline-none focus:ring-4 focus:ring-amber-700/10; }
-            .btn-compact { @apply rounded-full bg-stone-950 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-amber-800 focus:outline-none focus:ring-4 focus:ring-stone-950/10; }
-            .btn-compact-light { @apply rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-semibold text-stone-700 transition hover:border-stone-900 hover:text-stone-950 focus:outline-none focus:ring-4 focus:ring-stone-950/10; }
-            .btn-danger { @apply rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 transition hover:border-rose-700 hover:bg-rose-100 focus:outline-none focus:ring-4 focus:ring-rose-700/10; }
-        }
-
-        /* --- ANIMATIONS --- */
-        @keyframes reveal { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes float-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        @keyframes house-drift { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(18px); } }
-        .animate-reveal { animation: reveal 0.8s ease both; }
-        .animate-float-slow { animation: float-slow 6s ease-in-out infinite; }
-        .animate-house-drift { animation: house-drift 12s ease-in-out infinite; transform-origin: center; }
-
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f6f1e9; color: #1c1917; }
         [v-cloak] { display: none; }
+        
+        .panel { @apply bg-white rounded-[2rem] p-6 shadow-sm border border-white/50 backdrop-blur-sm; }
+        .input { @apply w-full rounded-xl border border-stone-200 bg-white px-4 py-3 outline-none transition focus:border-stone-900 focus:ring-4 focus:ring-stone-900/5; }
+        .btn-primary { @apply w-full rounded-xl bg-stone-950 py-3.5 font-bold text-white transition active:scale-95 hover:bg-stone-800; }
+        .tab-btn { @apply px-4 py-2 rounded-full text-sm font-semibold transition whitespace-nowrap; }
+        .metric-card { @apply bg-white p-6 rounded-3xl border border-white/50 shadow-sm; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 10px; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-in { animation: fadeIn 0.4s ease-out both; }
     </style>
 </head>
 <body>
 
 <div id="app" v-cloak>
     <!-- LOGIN PAGE -->
-    <div v-if="!session" class="min-h-screen relative overflow-hidden bg-[#f7efe3]">
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(132,86,40,0.18),transparent_30%),linear-gradient(135deg,#fbf4e8_0%,#f7efe3_45%,#e7d1b3_100%)]"></div>
+    <div v-if="!session" class="min-h-screen relative flex items-center justify-center p-6 overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(132,86,40,0.1),transparent_30%),linear-gradient(135deg,#fbf4e8_0%,#f6f1e9_100%)]"></div>
         
-        <!-- House Scene -->
-        <div class="pointer-events-none absolute inset-x-0 bottom-0 h-[56vh] opacity-80">
-            <svg class="h-full w-full" viewBox="0 0 1200 520" preserveAspectRatio="xMidYMax slice">
-                <path d="M0 400 C180 340 240 405 410 350 C570 300 710 355 850 318 C1010 276 1090 312 1200 250 L1200 520 L0 520 Z" fill="#d7b98d" opacity="0.45" />
-                <g class="animate-house-drift" fill="#8a5a2b28" stroke="#3f2f22" stroke-opacity="0.28" stroke-width="3">
-                    <path d="M715 170 L960 250 L960 505 L555 505 L555 245 Z" />
-                    <path d="M280 275 H555 V505 H280 Z" />
-                </g>
-            </svg>
-        </div>
+        <div class="relative w-full max-w-lg z-10">
+            <header class="mb-12 text-center lg:text-left">
+                <p class="text-[10px] font-bold tracking-[0.4em] text-stone-500 uppercase mb-4">Live Rental Operations</p>
+                <h1 class="text-5xl lg:text-7xl font-extrabold tracking-tighter mb-4">Madaje's Boarding House</h1>
+                <p class="text-stone-600">Manage tenants, rooms, due dates, payments, and account access in one portal.</p>
+            </header>
 
-        <div class="relative grid min-h-screen lg:grid-cols-[1.2fr_0.8fr]">
-            <section class="flex flex-col justify-between px-6 py-8 sm:px-10 lg:px-16">
-                <div class="animate-reveal flex items-center gap-3">
-                    <div class="grid h-12 w-12 place-items-center rounded-full border border-stone-900/15 bg-white/55 font-black backdrop-blur">MB</div>
-                    <p class="text-lg font-semibold">Madaje's Boarding House</p>
+            <div class="panel shadow-2xl">
+                <div class="mb-8">
+                    <p class="text-xs font-bold text-amber-700 uppercase tracking-widest mb-2">Secure Login</p>
+                    <h2 class="text-3xl font-bold">Choose an account</h2>
                 </div>
-                <div>
-                    <h1 class="animate-reveal text-6xl font-black leading-[0.9] tracking-[-0.08em] sm:text-8xl">The Rental<br>Portal.</h1>
-                    <p class="animate-reveal mt-6 max-w-2xl text-lg text-stone-700">A static-safe portal for room management and tenant tracking.</p>
-                </div>
-                <div class="animate-reveal text-sm text-stone-700">Static Portal • Runs on GitHub Pages</div>
-            </section>
 
-            <section class="flex items-center justify-center bg-white/55 px-6 py-10 backdrop-blur-xl lg:px-10">
-                <div class="animate-float-slow w-full max-w-md rounded-[2rem] border border-white/70 bg-white/85 p-8 shadow-2xl">
-                    <h2 class="text-3xl font-bold mb-6">Sign In</h2>
-                    <div class="space-y-4">
-                        <input v-model="loginForm.user" type="text" placeholder="Username" class="input">
-                        <input v-model="loginForm.pass" type="password" placeholder="Password" class="input">
-                        <button @click="login" class="btn-primary w-full">Open Dashboard</button>
-                        <p class="text-xs text-center text-stone-500">Demo: admin / admin123</p>
+                <!-- Role Toggle -->
+                <div class="flex p-1 bg-stone-100 rounded-full mb-6">
+                    <button @click="loginRole = 'admin'" :class="loginRole === 'admin' ? 'bg-black text-white shadow-md' : 'text-stone-500'" class="flex-1 py-2 rounded-full text-sm font-bold transition">Admin</button>
+                    <button @click="loginRole = 'tenant'" :class="loginRole === 'tenant' ? 'bg-black text-white shadow-md' : 'text-stone-500'" class="flex-1 py-2 rounded-full text-sm font-bold transition">Tenant</button>
+                </div>
+
+                <div class="space-y-4">
+                    <label class="block">
+                        <span class="text-xs font-bold text-stone-500 mb-2 block">Username</span>
+                        <input v-model="loginForm.username" type="text" class="input" placeholder="admin">
+                    </label>
+                    <label class="block">
+                        <span class="text-xs font-bold text-stone-500 mb-2 block">Password</span>
+                        <input v-model="loginForm.password" type="password" class="input" placeholder="••••••••">
+                    </label>
+
+                    <p v-if="loginError" class="text-xs text-rose-600 bg-rose-50 p-3 rounded-xl border border-rose-100">{{ loginError }}</p>
+
+                    <button @click="handleLogin" class="btn-primary mt-4">Open {{ loginRole === 'admin' ? 'Admin' : 'Tenant' }} Dashboard</button>
+                </div>
+
+                <div class="mt-8 pt-8 border-t border-stone-100 space-y-4">
+                    <div class="text-[10px] text-stone-400 font-bold uppercase tracking-widest">Demo Credentials</div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button @click="setDemo('admin')" class="text-left p-3 rounded-xl bg-stone-50 hover:bg-stone-100 transition">
+                            <p class="text-[10px] text-stone-400 font-bold">Admin</p>
+                            <p class="text-xs font-bold">admin / admin123</p>
+                        </button>
+                        <button @click="setDemo('tenant')" class="text-left p-3 rounded-xl bg-stone-50 hover:bg-stone-100 transition">
+                            <p class="text-[10px] text-stone-400 font-bold">Tenant</p>
+                            <p class="text-xs font-bold">ana / tenant123</p>
+                        </button>
                     </div>
                 </div>
-            </section>
+            </div>
+
+            <!-- Location info -->
+            <div class="mt-8 panel p-4">
+                <div class="flex gap-4 items-start">
+                    <div class="flex-1">
+                        <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Location</p>
+                        <p class="text-xs font-bold leading-relaxed">{{ property.address }}</p>
+                    </div>
+                    <button class="px-3 py-1.5 rounded-lg border border-stone-200 text-[10px] font-bold">Open Map</button>
+                </div>
+                <div class="mt-3 rounded-xl overflow-hidden h-32 bg-stone-200">
+                    <iframe class="w-full h-full grayscale opacity-70" :src="property.mapUrl" frameborder="0"></iframe>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- MAIN DASHBOARD -->
-    <div v-else class="flex min-h-screen bg-[#f6f1e9]">
-        <!-- Sidebar -->
-        <aside class="w-72 bg-white/50 border-r border-stone-200 p-6 hidden lg:block">
-            <div class="bg-stone-950 p-6 rounded-[2rem] text-white mb-8">
-                <p class="text-[10px] tracking-widest opacity-50 uppercase">Admin Portal</p>
-                <h2 class="text-xl font-bold mt-2">Madaje's</h2>
-            </div>
-            <nav class="space-y-2">
-                <button v-for="tab in ['Overview', 'Rooms', 'Tenants']" 
-                        @click="activeTab = tab"
-                        :class="activeTab === tab ? 'bg-amber-800 text-white shadow-lg' : 'text-stone-600 hover:bg-white'"
-                        class="w-full text-left px-5 py-3 rounded-2xl font-semibold transition">
-                    {{ tab }}
-                </button>
-                <button @click="logout" class="w-full text-left px-5 py-3 rounded-2xl font-semibold text-rose-600 hover:bg-rose-50">Logout</button>
-            </nav>
-        </aside>
-
-        <!-- Content -->
-        <main class="flex-1 p-6 lg:p-10">
-            <header class="mb-10">
-                <h1 class="text-4xl font-black">{{ activeTab }}</h1>
-            </header>
-
-            <!-- Overview -->
-            <div v-if="activeTab === 'Overview'" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-white p-8 rounded-[2rem] shadow-sm">
-                    <p class="text-stone-500 font-semibold">Total Rooms</p>
-                    <p class="text-4xl font-black mt-2">{{ rooms.length }}</p>
+    <div v-else class="min-h-screen flex flex-col">
+        <!-- Navigation Header -->
+        <nav class="sticky top-0 z-30 bg-white/70 backdrop-blur-md border-b border-stone-200 px-6 py-4 no-print">
+            <div class="max-w-[1400px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">{{ session.role === 'admin' ? 'Admin Portal' : 'Tenant Portal' }}</p>
+                    <h2 class="font-bold text-stone-900">{{ property.name }}</h2>
                 </div>
-                <div class="bg-white p-8 rounded-[2rem] shadow-sm">
-                    <p class="text-stone-500 font-semibold">Tenants</p>
-                    <p class="text-4xl font-black mt-2">{{ tenants.length }}</p>
+
+                <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+                    <button v-for="tab in currentTabs" 
+                            @click="activeTab = tab"
+                            :class="activeTab === tab ? 'bg-amber-900 text-white shadow-lg' : 'text-stone-500 hover:bg-stone-100'"
+                            class="tab-btn">
+                        {{ tab }}
+                    </button>
+                    <button @click="logout" class="bg-black text-white px-4 py-2 rounded-full text-xs font-bold ml-2">Log out</button>
                 </div>
             </div>
+        </nav>
 
-            <!-- Rooms -->
-            <div v-if="activeTab === 'Rooms'" class="space-y-6">
-                <div class="bg-white p-8 rounded-[2rem] shadow-sm">
-                    <h3 class="text-xl font-bold mb-4">Add Room</h3>
-                    <div class="flex gap-4">
-                        <input v-model="newRoom.name" placeholder="Room Name" class="input">
-                        <input v-model="newRoom.rate" placeholder="Rate" class="input">
-                        <button @click="addRoom" class="btn-primary">Add</button>
+        <main class="flex-1 max-w-[1400px] mx-auto w-full p-6 md:p-10 space-y-12">
+            
+            <!-- ADMIN VIEW: OVERVIEW -->
+            <div v-if="activeTab === 'Overview' && session.role === 'admin'" class="animate-in space-y-8">
+                <header>
+                    <p class="text-xs font-bold text-amber-700 uppercase tracking-[0.2em] mb-2">Admin Dashboard</p>
+                    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter">Analytics, revenue, tenants, rooms, and reports</h1>
+                    <p class="text-stone-500 mt-4">Live as of {{ today }}. Balances are recalculated from each tenant move-in date and monthly rent.</p>
+                </header>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="metric-card">
+                        <p class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4">Verified Revenue</p>
+                        <p class="text-3xl font-extrabold">{{ formatCurrency(stats.verifiedRevenue) }}</p>
+                        <p class="text-xs font-semibold text-stone-400 mt-2">{{ formatCurrency(stats.pendingRevenue) }} pending</p>
+                    </div>
+                    <div class="metric-card">
+                        <p class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4">Total Tenants</p>
+                        <p class="text-3xl font-extrabold">{{ tenants.length }}</p>
+                        <p class="text-xs font-semibold text-stone-400 mt-2">{{ formatCurrency(stats.totalDue) }} balance due</p>
+                    </div>
+                    <div class="metric-card">
+                        <p class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4">Rooms</p>
+                        <p class="text-3xl font-extrabold">{{ rooms.length }}</p>
+                        <p class="text-xs font-semibold text-stone-400 mt-2">{{ occupiedSpaceCount }}/{{ totalCapacity }} occupied spaces, {{ totalCapacity - occupiedSpaceCount }} open</p>
+                    </div>
+                    <div class="metric-card">
+                        <p class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4">Active Reports</p>
+                        <p class="text-3xl font-extrabold text-rose-600">{{ activeReportsCount }}</p>
+                        <p class="text-xs font-semibold text-stone-400 mt-2">{{ reports.length }} total tenant reports</p>
                     </div>
                 </div>
-                <div class="grid gap-4">
-                    <div v-for="room in rooms" class="bg-white/70 p-4 rounded-2xl border border-stone-200 flex justify-between">
-                        <span class="font-bold">{{ room.name }}</span>
-                        <span class="text-stone-500">PHP {{ room.rate }}</span>
+
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <div class="panel">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="font-bold text-xl">Revenue by payment type</h3>
+                            <button class="text-xs font-bold text-amber-900">Print summary</button>
+                        </div>
+                        <div class="space-y-6">
+                            <div v-for="method in ['Cash', 'GCash', 'E-cash']" :key="method">
+                                <div class="flex justify-between text-xs font-bold mb-2">
+                                    <span>{{ method }}</span>
+                                    <span>{{ formatCurrency(getRevenueByMethod(method)) }}</span>
+                                </div>
+                                <div class="h-4 bg-stone-100 rounded-full overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-amber-900 to-black transition-all duration-1000" 
+                                         :style="{ width: getRevenuePercent(method) + '%' }"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <h3 class="font-bold text-xl mb-6">Due watchlist</h3>
+                        <div class="space-y-4">
+                            <div v-for="t in topDueTenants" :key="t.id" class="flex items-center justify-between p-4 rounded-2xl bg-stone-50 border border-stone-100">
+                                <div>
+                                    <p class="font-bold text-sm">{{ t.name }}</p>
+                                    <p class="text-[10px] text-stone-400 font-bold uppercase tracking-widest">Room {{ t.roomName }} since {{ formatDateShort(t.moveInDate) }}</p>
+                                </div>
+                                <p class="font-extrabold text-rose-600 text-sm">{{ formatCurrency(t.due) }}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <!-- ADMIN VIEW: TENANTS -->
+            <div v-if="activeTab === 'Tenants' && session.role === 'admin'" class="animate-in space-y-8">
+                <header>
+                    <p class="text-xs font-bold text-amber-700 uppercase tracking-[0.2em] mb-2">Tenant Management</p>
+                    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter">Register tenants and transfer rooms</h1>
+                </header>
+
+                <div class="grid lg:grid-cols-3 gap-8">
+                    <div class="panel lg:col-span-1 h-fit">
+                        <h3 class="font-bold text-xl mb-6">Register new tenant</h3>
+                        <div class="space-y-4">
+                            <label class="block">
+                                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Full name</span>
+                                <input v-model="tenantForm.name" type="text" class="input" placeholder="Tenant name">
+                            </label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <label class="block">
+                                    <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Email</span>
+                                    <input v-model="tenantForm.email" type="email" class="input" placeholder="email@example.com">
+                                </label>
+                                <label class="block">
+                                    <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Phone</span>
+                                    <input v-model="tenantForm.phone" type="text" class="input" placeholder="09xx xxx xxxx">
+                                </label>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <label class="block">
+                                    <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Move-in date</span>
+                                    <input v-model="tenantForm.startDate" type="date" class="input">
+                                </label>
+                                <label class="block">
+                                    <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Monthly rent</span>
+                                    <input v-model="tenantForm.monthlyRent" type="number" class="input">
+                                </label>
+                            </div>
+                            <label class="block">
+                                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Room</span>
+                                <select v-model="tenantForm.roomId" class="input">
+                                    <option v-for="r in availableRooms" :key="r.id" :value="r.id">{{ r.name }} - {{ r.openSpaces }} spaces open</option>
+                                </select>
+                            </label>
+                            <button @click="registerTenant" class="btn-primary mt-2">Register tenant</button>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-2 space-y-6">
+                        <div class="panel">
+                             <h3 class="font-bold text-xl mb-6">Transfer tenant to another room</h3>
+                             <div class="flex gap-4">
+                                <select v-model="transferForm.tenantId" class="input flex-1">
+                                    <option v-for="t in tenants" :key="t.id" :value="t.id">{{ t.name }}</option>
+                                </select>
+                                <select v-model="transferForm.roomId" class="input flex-1">
+                                    <option v-for="r in availableRooms" :key="r.id" :value="r.id">{{ r.name }}</option>
+                                </select>
+                                <button @click="transferTenant" class="bg-black text-white px-6 rounded-xl font-bold">Transfer</button>
+                             </div>
+                        </div>
+
+                        <div class="panel overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead>
+                                    <tr class="text-stone-400 font-bold uppercase tracking-widest">
+                                        <th class="pb-6">Tenant</th>
+                                        <th class="pb-6">Room</th>
+                                        <th class="pb-6">Move-in</th>
+                                        <th class="pb-6">Monthly</th>
+                                        <th class="pb-6 text-rose-600">Due</th>
+                                        <th class="pb-6 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-stone-100">
+                                    <tr v-for="t in tenants" :key="t.id">
+                                        <td class="py-6">
+                                            <p class="font-bold text-sm">{{ t.name }}</p>
+                                            <p class="text-stone-400">{{ t.email }}</p>
+                                        </td>
+                                        <td class="py-6 font-semibold">{{ getRoomName(t.roomId) }}</td>
+                                        <td class="py-6 font-semibold">{{ formatDateShort(t.startDate) }}</td>
+                                        <td class="py-6 font-semibold">{{ formatCurrency(t.monthlyRent) }}</td>
+                                        <td class="py-6 font-extrabold text-rose-600 text-sm">{{ formatCurrency(calculateDue(t)) }}</td>
+                                        <td class="py-6 text-right space-x-2">
+                                            <button class="btn-compact-light">Print</button>
+                                            <button @click="deleteTenant(t.id)" class="btn-danger">Delete</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN VIEW: ROOMS -->
+            <div v-if="activeTab === 'Rooms' && session.role === 'admin'" class="animate-in space-y-8">
+                <header>
+                    <p class="text-xs font-bold text-amber-700 uppercase tracking-[0.2em] mb-2">Room Inventory</p>
+                    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter">Add rooms and maintain statuses</h1>
+                </header>
+
+                <div class="grid lg:grid-cols-3 gap-8">
+                    <div class="panel lg:col-span-1 h-fit">
+                        <h3 class="font-bold text-xl mb-6">Add room</h3>
+                        <div class="space-y-4">
+                            <label class="block">
+                                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Room name</span>
+                                <input v-model="roomForm.name" type="text" class="input" placeholder="Room 204">
+                            </label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <label class="block">
+                                    <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Room number</span>
+                                    <input v-model="roomForm.number" type="text" class="input" placeholder="204">
+                                </label>
+                                <label class="block">
+                                    <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Type</span>
+                                    <input v-model="roomForm.type" type="text" class="input" placeholder="Solo">
+                                </label>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <label class="block">
+                                    <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Monthly rate</span>
+                                    <input v-model="roomForm.rate" type="number" class="input">
+                                </label>
+                                <label class="block">
+                                    <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Capacity</span>
+                                    <input v-model="roomForm.capacity" type="number" class="input">
+                                </label>
+                            </div>
+                            <label class="block">
+                                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Inclusions</span>
+                                <textarea v-model="roomForm.inclusions" class="input h-24" placeholder="Bed, fan, wifi..."></textarea>
+                            </label>
+                            <button @click="addRoom" class="btn-primary mt-2">Add room</button>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-2 space-y-4">
+                        <div v-for="r in rooms" :key="r.id" class="panel p-5 flex flex-col md:flex-row justify-between md:items-center gap-4">
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <p class="font-extrabold text-lg">Room {{ r.number }}</p>
+                                    <span :class="getRoomStatusColor(r)" class="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border">
+                                        {{ r.status }}
+                                    </span>
+                                </div>
+                                <p class="text-xs text-stone-500">{{ r.type }} room, {{ formatCurrency(r.rate) }} monthly</p>
+                                <p class="text-xs text-stone-400">Capacity: {{ getOccupancy(r.id) }}/{{ r.capacity }} occupied, {{ r.capacity - getOccupancy(r.id) }} open</p>
+                                <p v-if="getTenantsInRoom(r.id).length" class="text-xs font-bold text-stone-800">Tenants: {{ getTenantsInRoom(r.id).map(t => t.name).join(', ') }}</p>
+                            </div>
+                            <div class="flex gap-2 items-center">
+                                <select v-model="r.status" @change="saveRooms" class="input text-xs py-2 w-32">
+                                    <option>Available</option>
+                                    <option>Occupied</option>
+                                    <option>Maintenance</option>
+                                </select>
+                                <button @click="deleteRoom(r.id)" class="btn-danger p-2 h-10 w-10 flex items-center justify-center">×</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN VIEW: PAYMENTS -->
+            <div v-if="activeTab === 'Payments' && session.role === 'admin'" class="animate-in space-y-8">
+                 <header>
+                    <p class="text-xs font-bold text-amber-700 uppercase tracking-[0.2em] mb-2">Payments</p>
+                    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter">Review tenant payments and print reports</h1>
+                </header>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="metric-card">
+                        <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-4">Verified</p>
+                        <p class="text-3xl font-extrabold">{{ formatCurrency(stats.verifiedRevenue) }}</p>
+                        <p class="text-xs text-stone-400 mt-1">Confirmed collection</p>
+                    </div>
+                    <div class="metric-card">
+                        <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-4">Pending</p>
+                        <p class="text-3xl font-extrabold">{{ formatCurrency(stats.pendingRevenue) }}</p>
+                        <p class="text-xs text-stone-400 mt-1">Awaiting admin verification</p>
+                    </div>
+                    <div class="metric-card">
+                        <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-4">Outstanding</p>
+                        <p class="text-3xl font-extrabold text-stone-900">{{ formatCurrency(stats.totalDue) }}</p>
+                        <p class="text-xs text-stone-400 mt-1">Computed monthly balance</p>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="flex items-center justify-between mb-8">
+                        <h3 class="font-bold text-xl">Payment ledger</h3>
+                        <button class="bg-black text-white px-4 py-2 rounded-full text-xs font-bold">Print collection report</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="text-stone-400 font-bold uppercase tracking-widest">
+                                    <th class="pb-6">Tenant</th>
+                                    <th class="pb-6">Date</th>
+                                    <th class="pb-6">Method</th>
+                                    <th class="pb-6">Reference</th>
+                                    <th class="pb-6">Amount</th>
+                                    <th class="pb-6">Status</th>
+                                    <th class="pb-6 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-stone-100">
+                                <tr v-for="p in payments" :key="p.id">
+                                    <td class="py-6 font-bold text-sm">{{ p.tenantName }}</td>
+                                    <td class="py-6 font-semibold">{{ formatDateShort(p.date) }}</td>
+                                    <td class="py-6 font-semibold text-stone-500">{{ p.method }}</td>
+                                    <td class="py-6 font-mono text-stone-400 uppercase">{{ p.reference }}</td>
+                                    <td class="py-6 font-extrabold text-sm">{{ formatCurrency(p.amount) }}</td>
+                                    <td class="py-6">
+                                        <span :class="p.status === 'Verified' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-amber-50 text-amber-700 border-amber-100'" 
+                                              class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border">
+                                            {{ p.status }}
+                                        </span>
+                                    </td>
+                                    <td class="py-6 text-right space-x-2">
+                                        <button v-if="p.status === 'Pending'" @click="verifyPayment(p.id)" class="bg-black text-white px-3 py-1.5 rounded-lg font-bold">Verify</button>
+                                        <button class="btn-compact-light">Print</button>
+                                        <button @click="deletePayment(p.id)" class="btn-danger">Delete</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN VIEW: CALENDAR -->
+            <div v-if="activeTab === 'Calendar' && session.role === 'admin'" class="animate-in space-y-8">
+                 <header>
+                    <p class="text-xs font-bold text-amber-700 uppercase tracking-[0.2em] mb-2">Schedule Calendar</p>
+                    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter">Create schedules tenants can see</h1>
+                </header>
+
+                <div class="grid lg:grid-cols-3 gap-8">
+                    <div class="panel lg:col-span-1 h-fit">
+                        <h3 class="font-bold text-xl mb-6">Add schedule</h3>
+                        <div class="space-y-4">
+                            <label class="block">
+                                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Title</span>
+                                <input v-model="scheduleForm.title" type="text" class="input" placeholder="Schedule title">
+                            </label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <label class="block">
+                                    <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Category</span>
+                                    <select v-model="scheduleForm.category" class="input">
+                                        <option>Reminder</option>
+                                        <option>Payment</option>
+                                        <option>Maintenance</option>
+                                    </select>
+                                </label>
+                                <label class="block">
+                                    <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Time</span>
+                                    <input v-model="scheduleForm.time" type="time" class="input">
+                                </label>
+                            </div>
+                            <label class="block">
+                                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Date</span>
+                                <input v-model="scheduleForm.date" type="date" class="input">
+                            </label>
+                            <label class="block">
+                                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Details</span>
+                                <textarea v-model="scheduleForm.details" class="input h-24" placeholder="Description..."></textarea>
+                            </label>
+                            <div class="flex items-center gap-3 py-2">
+                                <input v-model="scheduleForm.visibleToTenants" type="checkbox" class="w-5 h-5 accent-black">
+                                <span class="text-xs font-bold text-stone-600">Show this schedule to tenants</span>
+                            </div>
+                            <button @click="addSchedule" class="btn-primary mt-2">Add schedule</button>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-2 space-y-8">
+                         <div class="panel">
+                             <div class="flex items-center justify-between mb-8">
+                                <h3 class="font-bold text-xl">Calendar view</h3>
+                                <p class="text-xs font-bold text-stone-400 uppercase tracking-widest">{{ activeMonthYear }}</p>
+                             </div>
+                             
+                             <div class="grid grid-cols-7 gap-2 text-center text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] mb-4">
+                                <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                             </div>
+
+                             <div class="grid grid-cols-7 gap-2">
+                                <div v-for="day in calendarDays" :key="day.date" 
+                                     :class="[!day.current ? 'opacity-20' : '', day.isToday ? 'border-stone-900 bg-stone-50' : 'border-stone-100']"
+                                     class="aspect-square border rounded-2xl p-2 relative">
+                                    <span class="text-xs font-bold">{{ day.dayNum }}</span>
+                                    
+                                    <div class="mt-1 space-y-1 overflow-hidden">
+                                        <div v-for="ev in day.events" :key="ev.id" 
+                                             class="text-[8px] leading-tight font-bold bg-black text-white px-1 py-0.5 rounded truncate">
+                                            {{ ev.time }} {{ ev.title }}
+                                        </div>
+                                    </div>
+                                </div>
+                             </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN VIEW: REPORTS -->
+            <div v-if="activeTab === 'Reports' && session.role === 'admin'" class="animate-in space-y-8">
+                 <header>
+                    <p class="text-xs font-bold text-amber-700 uppercase tracking-[0.2em] mb-2">Tenant Reports</p>
+                    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter">Monitor concerns and maintenance requests</h1>
+                </header>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div v-for="rep in reports" :key="rep.id" class="panel space-y-4">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-extrabold text-xl">{{ rep.title }}</h3>
+                            <span :class="rep.status === 'Open' ? 'bg-rose-50 text-rose-700 border-rose-100' : 'bg-amber-50 text-amber-700 border-amber-100'"
+                                  class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border">
+                                {{ rep.status }}
+                            </span>
+                        </div>
+                        <p class="text-sm text-stone-600 leading-relaxed">{{ rep.details }}</p>
+                        
+                        <div class="pt-4 border-t border-stone-50 text-[10px] font-bold text-stone-400 uppercase tracking-widest space-y-1">
+                            <p>{{ rep.category }} from {{ rep.tenantName }}</p>
+                            <p>Room {{ rep.roomName }} on {{ formatDateShort(rep.date) }}</p>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <select v-model="rep.status" @change="saveReports" class="input py-2 flex-1">
+                                <option>Open</option>
+                                <option>In Progress</option>
+                                <option>Resolved</option>
+                            </select>
+                            <button @click="deleteReport(rep.id)" class="btn-danger px-4">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN VIEW: USERS -->
+            <div v-if="activeTab === 'Users' && session.role === 'admin'" class="animate-in space-y-8">
+                 <header>
+                    <p class="text-xs font-bold text-amber-700 uppercase tracking-[0.2em] mb-2">User Accounts</p>
+                    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter">Create tenant login accounts</h1>
+                </header>
+
+                <div class="grid lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-1 space-y-6">
+                        <div class="panel">
+                             <h3 class="font-bold text-xl mb-6">Add tenant account</h3>
+                             <div class="space-y-4">
+                                <label class="block">
+                                    <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Tenant without account</span>
+                                    <select v-model="accountForm.tenantId" class="input">
+                                        <option v-for="t in tenantsWithoutAccounts" :key="t.id" :value="t.id">{{ t.name }}</option>
+                                    </select>
+                                </label>
+                                <label class="block">
+                                    <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Username</span>
+                                    <input v-model="accountForm.username" type="text" class="input" placeholder="tenant.username">
+                                </label>
+                                <label class="block">
+                                    <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Password</span>
+                                    <input v-model="accountForm.password" type="password" class="input" placeholder="••••••••">
+                                </label>
+                                <button @click="createAccount" class="btn-primary mt-2">Create account</button>
+                             </div>
+                        </div>
+
+                        <div class="panel">
+                             <h3 class="font-bold text-xl mb-6">Edit tenant account</h3>
+                             <div class="space-y-4">
+                                <label class="block">
+                                    <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Tenant account</span>
+                                    <select v-model="editingAccount" @change="loadEditingAccount" class="input">
+                                        <option v-for="a in tenantAccounts" :key="a.id" :value="a.id">{{ a.username }} ({{ a.tenantName }})</option>
+                                    </select>
+                                </label>
+                                <label class="block">
+                                    <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Username</span>
+                                    <input v-model="accountEditForm.username" type="text" class="input">
+                                </label>
+                                <label class="block">
+                                    <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Password</span>
+                                    <input v-model="accountEditForm.password" type="password" class="input">
+                                </label>
+                                <button @click="updateAccount" class="btn-secondary w-full border-stone-200">Save account changes</button>
+                             </div>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="panel p-0 overflow-hidden">
+                            <div class="p-6 border-b border-stone-50">
+                                <h3 class="font-bold text-xl">Accounts</h3>
+                            </div>
+                            <div class="divide-y divide-stone-50">
+                                <div v-for="a in accounts" :key="a.id" class="p-6 flex justify-between items-center hover:bg-stone-50 transition">
+                                    <div>
+                                        <p class="font-extrabold">{{ a.username }}</p>
+                                        <p class="text-[10px] text-stone-400 font-bold uppercase tracking-widest">
+                                            {{ a.role === 'admin' ? 'Admin account' : 'Tenant: ' + a.tenantName }}
+                                        </p>
+                                        <p class="text-[10px] text-stone-300 font-bold">Password: ********</p>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <span v-if="a.role === 'admin'" class="text-[10px] font-bold uppercase tracking-widest bg-stone-100 px-3 py-1 rounded-full border border-stone-200">Admin</span>
+                                        <span v-if="a.username === session.username" class="text-[10px] font-bold uppercase tracking-widest border border-stone-200 px-3 py-1 rounded-full text-stone-400">Current</span>
+                                        <button v-if="a.role === 'tenant'" @click="deleteAccount(a.id)" class="btn-danger">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN VIEW: PROFILE -->
+            <div v-if="activeTab === 'Profile' && session.role === 'admin'" class="animate-in space-y-8">
+                 <header>
+                    <p class="text-xs font-bold text-amber-700 uppercase tracking-[0.2em] mb-2">Boarding House Profile</p>
+                    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter">Configure public property details</h1>
+                    <p class="text-stone-500 mt-4">These details appear on printable reports and the login experience.</p>
+                </header>
+
+                <div class="panel grid md:grid-cols-2 gap-8">
+                    <div class="space-y-6">
+                        <h3 class="font-bold text-xl">Property information</h3>
+                        <div class="space-y-4">
+                            <label class="block">
+                                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Boarding house name</span>
+                                <input v-model="property.name" type="text" class="input">
+                            </label>
+                            <label class="block">
+                                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Manager</span>
+                                <input v-model="property.manager" type="text" class="input">
+                            </label>
+                            <label class="block">
+                                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Phone</span>
+                                <input v-model="property.phone" type="text" class="input">
+                            </label>
+                            <label class="block">
+                                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Address</span>
+                                <input v-model="property.address" type="text" class="input">
+                            </label>
+                            <label class="block">
+                                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Google map embed/link</span>
+                                <input v-model="property.mapUrl" type="text" class="input">
+                            </label>
+                            <label class="block">
+                                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Notes</span>
+                                <textarea v-model="property.notes" class="input h-24"></textarea>
+                            </label>
+                            <button @click="saveProperty" class="btn-primary">Save Changes</button>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="rounded-3xl overflow-hidden h-full min-h-[400px] border border-stone-100 shadow-inner">
+                            <iframe class="w-full h-full grayscale opacity-50" :src="property.mapUrl" frameborder="0"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TENANT VIEW: DASHBOARD -->
+            <div v-if="activeTab === 'Dashboard' && session.role === 'tenant'" class="animate-in space-y-8">
+                 <header>
+                    <p class="text-xs font-bold text-amber-700 uppercase tracking-[0.2em] mb-2">Tenant Dashboard</p>
+                    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter">Welcome, {{ session.tenant.name }}</h1>
+                    <p class="text-stone-500 mt-4">Your room due is shared with roommates. A monthly payment by one tenant in the room updates the account of every tenant in that room.</p>
+                </header>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="metric-card">
+                        <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-4">Current due</p>
+                        <p class="text-3xl font-extrabold">{{ formatCurrency(calculateDue(session.tenant)) }}</p>
+                        <p class="text-xs font-semibold text-stone-400 mt-2">{{ getBillingMonths(session.tenant.startDate) }} billing month(s)</p>
+                    </div>
+                    <div class="metric-card">
+                        <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-4">Monthly rent</p>
+                        <p class="text-3xl font-extrabold">{{ formatCurrency(session.tenant.monthlyRent) }}</p>
+                        <p class="text-xs font-semibold text-stone-400 mt-2">Next due {{ getNextDueDate(session.tenant.startDate) }}</p>
+                    </div>
+                    <div class="metric-card">
+                        <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-4">Verified paid</p>
+                        <p class="text-3xl font-extrabold text-emerald-600">{{ formatCurrency(getVerifiedPaid(session.tenant.id)) }}</p>
+                        <p class="text-xs font-semibold text-stone-400 mt-2">{{ formatCurrency(getPendingPaid(session.tenant.id)) }} pending</p>
+                    </div>
+                    <div class="metric-card">
+                        <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-4">Rooms with space</p>
+                        <p class="text-3xl font-extrabold">{{ availableRooms.length }}</p>
+                        <p class="text-xs font-semibold text-stone-400 mt-2">{{ totalCapacity - occupiedSpaceCount }} total open space(s)</p>
+                    </div>
+                </div>
+
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <div class="space-y-6">
+                        <div class="panel bg-black text-white p-8">
+                            <p class="text-[10px] font-bold tracking-[0.2em] text-white/40 uppercase mb-4">Billing Timeline</p>
+                            <div class="bg-white/10 p-6 rounded-2xl border border-white/5 space-y-4">
+                                <p class="text-[10px] font-bold tracking-widest text-white/50 uppercase">Dynamic Date Calculator</p>
+                                <p class="text-4xl font-black">{{ formatCurrency(getBillingMonths(session.tenant.startDate) * session.tenant.monthlyRent) }}</p>
+                                <p class="text-xs text-white/40 leading-relaxed">Move-in date {{ formatDateShort(session.tenant.startDate) }} x {{ getBillingMonths(session.tenant.startDate) }} month(s) at {{ formatCurrency(session.tenant.monthlyRent) }}.</p>
+                            </div>
+                            <button @click="activeTab = 'Payment'" class="btn-primary bg-white text-black mt-6 hover:bg-stone-200">Send payment</button>
+                        </div>
+
+                        <div class="panel">
+                             <h3 class="font-bold text-xl mb-6">Available rooms</h3>
+                             <div class="space-y-4">
+                                 <div v-for="r in availableRooms" :key="r.id" class="flex justify-between items-center p-4 border border-stone-100 rounded-2xl">
+                                     <div>
+                                         <p class="font-bold text-sm">{{ r.name }}</p>
+                                         <p class="text-[10px] text-stone-400 uppercase tracking-widest font-bold">{{ r.type }}, {{ r.openSpaces }} spaces open</p>
+                                     </div>
+                                     <p class="font-extrabold text-sm">{{ formatCurrency(r.rate) }}</p>
+                                 </div>
+                             </div>
+                        </div>
+                    </div>
+
+                    <div class="panel flex flex-col">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="font-bold text-xl">Boarding house location</h3>
+                            <button class="text-xs font-bold text-stone-400">Open Google Map</button>
+                        </div>
+                        <div class="flex-1 min-h-[400px] rounded-[1.5rem] overflow-hidden border border-stone-100 shadow-inner">
+                            <iframe class="w-full h-full grayscale opacity-60" :src="property.mapUrl" frameborder="0"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TENANT VIEW: CALENDAR -->
+            <div v-if="activeTab === 'Calendar' && session.role === 'tenant'" class="animate-in space-y-8">
+                 <header>
+                    <p class="text-xs font-bold text-amber-700 uppercase tracking-[0.2em] mb-2">Tenant Calendar</p>
+                    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter">Schedules from Madaje's Boarding House</h1>
+                    <p class="text-stone-500 mt-4">See rent collection, maintenance, cleaning, and other schedules published by the admin.</p>
+                </header>
+
+                <div class="grid lg:grid-cols-2 gap-8">
+                     <div class="panel">
+                         <div class="flex items-center justify-between mb-8">
+                            <h3 class="font-bold text-xl">Calendar view</h3>
+                            <p class="text-xs font-bold text-stone-400 uppercase tracking-widest">{{ activeMonthYear }}</p>
+                         </div>
+                         
+                         <div class="grid grid-cols-7 gap-2 text-center text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] mb-4">
+                            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                         </div>
+
+                         <div class="grid grid-cols-7 gap-2">
+                            <div v-for="day in calendarDays" :key="day.date" 
+                                 :class="[!day.current ? 'opacity-20' : '', day.isToday ? 'border-stone-900 bg-stone-50' : 'border-stone-100']"
+                                 class="aspect-square border rounded-2xl p-2 relative">
+                                <span class="text-xs font-bold">{{ day.dayNum }}</span>
+                                
+                                <div class="mt-1 space-y-1 overflow-hidden">
+                                    <div v-for="ev in day.events.filter(e => e.visibleToTenants)" :key="ev.id" 
+                                         class="text-[8px] leading-tight font-bold bg-black text-white px-1 py-0.5 rounded truncate">
+                                        {{ ev.time }} {{ ev.title }}
+                                    </div>
+                                </div>
+                            </div>
+                         </div>
+                     </div>
+
+                     <div class="panel h-fit">
+                         <h3 class="font-bold text-xl mb-6">Upcoming schedules</h3>
+                         <div class="space-y-4">
+                             <div v-for="s in tenantSchedules" :key="s.id" class="p-5 border border-stone-100 rounded-2xl space-y-2">
+                                 <p class="font-extrabold">{{ s.title }}</p>
+                                 <p class="text-[10px] text-stone-400 font-bold uppercase tracking-widest">{{ s.category }} on {{ formatDateShort(s.date) }} at {{ s.time }}</p>
+                                 <p class="text-xs text-stone-600 leading-relaxed">{{ s.details }}</p>
+                             </div>
+                         </div>
+                     </div>
+                </div>
+            </div>
+
+            <!-- TENANT VIEW: PAYMENT -->
+            <div v-if="activeTab === 'Payment' && session.role === 'tenant'" class="animate-in space-y-8">
+                 <header>
+                    <p class="text-xs font-bold text-amber-700 uppercase tracking-[0.2em] mb-2">Tenant Payment</p>
+                    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter">Send cash or GCash payment notice</h1>
+                    <p class="text-stone-500 mt-4">One monthly room payment covers all tenants assigned to the same room after admin verification.</p>
+                </header>
+
+                <div class="grid lg:grid-cols-3 gap-8">
+                    <div class="panel h-fit">
+                        <h3 class="font-bold text-xl mb-6">Submit payment</h3>
+                        <div class="space-y-4">
+                            <label class="block">
+                                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Monthly payment amount</span>
+                                <input v-model="paymentForm.amount" type="number" class="input">
+                            </label>
+                            <button @click="paymentForm.amount = session.tenant.monthlyRent" class="btn-secondary w-full text-xs py-2 border-stone-200">Use one monthly payment ({{ formatCurrency(session.tenant.monthlyRent) }})</button>
+                            
+                            <label class="block">
+                                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Method</span>
+                                <select v-model="paymentForm.method" class="input">
+                                    <option>GCash</option>
+                                    <option>Cash</option>
+                                </select>
+                            </label>
+                            <label class="block">
+                                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Reference or note</span>
+                                <input v-model="paymentForm.reference" type="text" class="input" placeholder="GCash reference or cash note">
+                            </label>
+                            <button @click="submitPayment" class="btn-primary mt-2">Send payment for verification</button>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-2 space-y-4">
+                        <h3 class="font-bold text-xl px-4">My payment history</h3>
+                        <div v-for="p in myPayments" :key="p.id" class="panel p-5 flex justify-between items-center hover:bg-stone-50 transition">
+                            <div>
+                                <p class="font-extrabold text-lg">{{ formatCurrency(p.amount) }}</p>
+                                <p class="text-[10px] text-stone-400 font-bold uppercase tracking-widest">Paid by: {{ p.tenantName }} • {{ formatDateShort(p.date) }}</p>
+                                <p class="text-[10px] text-stone-300 font-bold">Reference: {{ p.reference }}</p>
+                            </div>
+                            <span :class="p.status === 'Verified' ? 'text-emerald-700 bg-emerald-50 border-emerald-100' : 'text-amber-700 bg-amber-50 border-amber-100'"
+                                  class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 border rounded-full">
+                                {{ p.status }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TENANT VIEW: REPORTS -->
+            <div v-if="activeTab === 'Reports' && session.role === 'tenant'" class="animate-in space-y-8">
+                 <header>
+                    <p class="text-xs font-bold text-amber-700 uppercase tracking-[0.2em] mb-2">Tenant Reports</p>
+                    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter">Send a concern or maintenance request</h1>
+                    <p class="text-stone-500 mt-4">Your reports go to the admin dashboard for tracking and resolution.</p>
+                </header>
+
+                <div class="grid lg:grid-cols-3 gap-8">
+                    <div class="panel h-fit">
+                        <h3 class="font-bold text-xl mb-6">New report</h3>
+                        <div class="space-y-4">
+                            <label class="block">
+                                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Category</span>
+                                <select v-model="reportForm.category" class="input">
+                                    <option>Maintenance</option>
+                                    <option>Payment concern</option>
+                                    <option>Room request</option>
+                                    <option>General concern</option>
+                                </select>
+                            </label>
+                            <label class="block">
+                                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Title</span>
+                                <input v-model="reportForm.title" type="text" class="input" placeholder="Short report title">
+                            </label>
+                            <label class="block">
+                                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Details</span>
+                                <textarea v-model="reportForm.details" class="input h-32" placeholder="Describe the issue"></textarea>
+                            </label>
+                            <button @click="submitReport" class="btn-primary mt-2">Send report</button>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-2 space-y-4">
+                        <h3 class="font-bold text-xl px-4">My reports</h3>
+                        <div v-for="r in myReports" :key="r.id" class="panel p-5 space-y-3">
+                             <div class="flex justify-between">
+                                 <p class="font-extrabold">{{ r.title }}</p>
+                                 <span :class="r.status === 'Open' ? 'text-rose-700 bg-rose-50 border-rose-100' : 'text-amber-700 bg-amber-50 border-amber-100'"
+                                       class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 border rounded-full">
+                                    {{ r.status }}
+                                 </span>
+                             </div>
+                             <p class="text-xs text-stone-600 leading-relaxed">{{ r.details }}</p>
+                             <p class="text-[10px] text-stone-400 font-bold uppercase tracking-widest">{{ r.category }} on {{ formatDateShort(r.date) }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TENANT VIEW: PROFILE -->
+            <div v-if="activeTab === 'Profile' && session.role === 'tenant'" class="animate-in space-y-8">
+                 <header>
+                    <p class="text-xs font-bold text-amber-700 uppercase tracking-[0.2em] mb-2">Profile Configuration</p>
+                    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter">Update your tenant profile and login</h1>
+                    <p class="text-stone-500 mt-4">Keep your contact details current so the boarding house can reach you about dues and reports.</p>
+                </header>
+
+                <div class="panel grid md:grid-cols-2 gap-8 max-w-4xl">
+                    <div class="space-y-6">
+                         <h3 class="font-bold text-xl">My profile</h3>
+                         <div class="space-y-4">
+                             <label class="block">
+                                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Full name</span>
+                                <input v-model="session.tenant.name" type="text" class="input">
+                            </label>
+                            <label class="block">
+                                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Email</span>
+                                <input v-model="session.tenant.email" type="text" class="input">
+                            </label>
+                            <label class="block">
+                                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Phone</span>
+                                <input v-model="session.tenant.phone" type="text" class="input">
+                            </label>
+                            <label class="block">
+                                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Username</span>
+                                <input v-model="session.account.username" type="text" class="input">
+                            </label>
+                            <label class="block">
+                                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Password</span>
+                                <input v-model="session.account.password" type="password" class="input">
+                            </label>
+                            <button @click="updateProfile" class="btn-primary mt-2">Save profile</button>
+                         </div>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 </div>
 
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <script>
-    const { createApp, ref, onMounted } = Vue;
+    const { createApp, ref, computed, watch } = Vue;
 
     createApp({
         setup() {
-            const session = ref(false);
+            // Simulated Persistence
+            const getData = (key, def) => JSON.parse(localStorage.getItem('madaje_' + key)) || def;
+            const saveData = (key, val) => localStorage.setItem('madaje_' + key, JSON.stringify(val));
+
+            // State
+            const session = ref(null);
             const activeTab = ref('Overview');
-            const loginForm = ref({ user: 'admin', pass: 'admin123' });
+            const loginRole = ref('admin');
+            const loginForm = ref({ username: '', password: '' });
+            const loginError = ref('');
+
+            // Data
+            const property = ref(getData('property', {
+                name: "Madaje's Boarding House",
+                manager: "Mariel Daje",
+                phone: "0918 234 8899",
+                address: "95WX+QQP Hinunangan, Southern Leyte. Nearby Address: San Pedro Street, Hinunangan, Southern Leyte",
+                mapUrl: "https://www.google.com/maps?q=10.3969560,125.1994614&z=18&output=embed",
+                notes: "Quiet, clean, and close to school routes."
+            }));
+
+            const rooms = ref(getData('rooms', [
+                { id: 1, number: '101', name: 'Room 101', type: 'Solo', rate: 4500, capacity: 1, status: 'Occupied', inclusions: 'Bed frame, foam, cabinet, electric fan' },
+                { id: 2, number: '102', name: 'Room 102', type: 'Double', rate: 3800, capacity: 2, status: 'Occupied', inclusions: 'Two beds, shared cabinet, study table' },
+                { id: 3, number: '103', name: 'Room 103', type: 'Solo', rate: 4500, capacity: 1, status: 'Occupied', inclusions: 'Bed frame, foam, cabinet, WiFi access' },
+                { id: 4, number: '201', name: 'Room 201', type: 'Studio', rate: 6200, capacity: 1, status: 'Available', inclusions: 'Private comfort room, cabinet, study table' },
+                { id: 5, number: '203', name: 'Room 203', type: 'Bedspace', rate: 2800, capacity: 4, status: 'Available', inclusions: 'Bunk beds, lockers, WiFi access' }
+            ]));
+
+            const tenants = ref(getData('tenants', [
+                { id: 1, name: 'Ana Cruz', email: 'ana.cruz@example.com', phone: '0917 111 2233', roomId: 1, startDate: '2026-01-10', monthlyRent: 4500 },
+                { id: 2, name: 'Miguel Santos', email: 'miguel.santos@example.com', phone: '0920 555 1188', roomId: 2, startDate: '2026-03-05', monthlyRent: 3800 },
+                { id: 3, name: 'Liza Ramos', email: 'liza.ramos@example.com', phone: '0920 123 4567', roomId: 2, startDate: '2026-03-05', monthlyRent: 3800 },
+                { id: 4, name: 'Rob Peter Escalera Madaje', email: 'manbalagao@gmail.com', phone: '0918 234 8899', roomId: 3, startDate: '2026-05-12', monthlyRent: 4500 }
+            ]));
+
+            const accounts = ref(getData('accounts', [
+                { id: 1, username: 'admin', password: 'admin123', role: 'admin' },
+                { id: 2, username: 'ana', password: 'tenant123', role: 'tenant', tenantId: 1 },
+                { id: 3, username: 'miguel', password: 'tenant123', role: 'tenant', tenantId: 2 },
+                { id: 4, username: 'liza', password: 'tenant123', role: 'tenant', tenantId: 3 }
+            ]));
+
+            const payments = ref(getData('payments', [
+                { id: 1, tenantId: 1, tenantName: 'Ana Cruz', amount: 13500, method: 'GCash', reference: 'GC-AX9281', date: '2026-04-12', status: 'Verified' },
+                { id: 2, tenantId: 1, tenantName: 'Ana Cruz', amount: 4500, method: 'Cash', reference: 'OR-1204', date: '2026-05-12', status: 'Pending' },
+                { id: 3, tenantId: 2, tenantName: 'Miguel Santos', amount: 3800, method: 'E-cash', reference: 'EC-4418', date: '2026-04-06', status: 'Verified' }
+            ]));
+
+            const schedules = ref(getData('schedules', [
+                { id: 1, title: 'Monthly rent collection', date: '2026-05-12', time: '09:00', category: 'Payment', details: 'Cash payments are accepted at the office. GCash receipts can be submitted in the tenant portal.', visibleToTenants: true },
+                { id: 2, title: 'Second floor cleaning', date: '2026-05-15', time: '08:30', category: 'Maintenance', details: 'Please keep the hallway clear before cleaning starts.', visibleToTenants: true },
+                { id: 3, title: 'Room inspection planning', date: '2026-05-19', time: '14:00', category: 'Maintenance', details: 'Internal admin preparation for room condition checks.', visibleToTenants: false }
+            ]));
+
+            const reports = ref(getData('reports', [
+                { id: 1, tenantId: 1, tenantName: 'Ana Cruz', roomName: '101', category: 'Maintenance', title: 'Faucet leak in comfort room', details: 'Water continues dripping after closing the faucet.', date: '2026-05-02', status: 'In Progress' },
+                { id: 2, tenantId: 2, tenantName: 'Miguel Santos', roomName: '102', category: 'Concern', title: 'Request to check hallway light', details: 'The second floor hallway light flickers at night.', date: '2026-05-04', status: 'Open' }
+            ]));
+
+            // Forms
+            const tenantForm = ref({ name: '', email: '', phone: '', startDate: '', monthlyRent: 0, roomId: null });
+            const roomForm = ref({ number: '', name: '', type: '', rate: 0, capacity: 0, inclusions: '', status: 'Available' });
+            const transferForm = ref({ tenantId: null, roomId: null });
+            const scheduleForm = ref({ title: '', category: 'Reminder', time: '09:00', date: '', details: '', visibleToTenants: true });
+            const accountForm = ref({ tenantId: null, username: '', password: '' });
+            const accountEditForm = ref({ username: '', password: '' });
+            const editingAccount = ref(null);
+            const reportForm = ref({ category: 'Maintenance', title: '', details: '' });
+            const paymentForm = ref({ amount: 0, method: 'GCash', reference: '' });
+
+            // Watchers for persistence
+            watch(property, (v) => saveData('property', v), { deep: true });
+            watch(rooms, (v) => saveData('rooms', v), { deep: true });
+            watch(tenants, (v) => saveData('tenants', v), { deep: true });
+            watch(accounts, (v) => saveData('accounts', v), { deep: true });
+            watch(payments, (v) => saveData('payments', v), { deep: true });
+            watch(schedules, (v) => saveData('schedules', v), { deep: true });
+            watch(reports, (v) => saveData('reports', v), { deep: true });
+
+            // Computed
+            const today = computed(() => new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }));
             
-            const rooms = ref(JSON.parse(localStorage.getItem('rooms') || '[]'));
-            const tenants = ref(JSON.parse(localStorage.getItem('tenants') || '[]'));
-            const newRoom = ref({ name: '', rate: '' });
+            const currentTabs = computed(() => {
+                if (!session.value) return [];
+                return session.value.role === 'admin' 
+                    ? ['Overview', 'Tenants', 'Rooms', 'Payments', 'Calendar', 'Reports', 'Users', 'Profile']
+                    : ['Dashboard', 'Calendar', 'Payment', 'Reports', 'Profile'];
+            });
 
-            const login = () => {
-                if(loginForm.value.user === 'admin' && loginForm.value.pass === 'admin123') {
-                    session.value = true;
-                } else {
-                    alert('Invalid credentials');
-                }
-            };
+            const stats = computed(() => {
+                const verified = payments.value.filter(p => p.status === 'Verified').reduce((sum, p) => sum + p.amount, 0);
+                const pending = payments.value.filter(p => p.status === 'Pending').reduce((sum, p) => sum + p.amount, 0);
+                const due = tenants.value.reduce((sum, t) => sum + calculateDue(t), 0);
+                return { verifiedRevenue: verified, pendingRevenue: pending, totalDue: due };
+            });
 
-            const logout = () => { session.value = false; };
+            const occupiedSpaceCount = computed(() => tenants.value.length);
+            const totalCapacity = computed(() => rooms.value.reduce((sum, r) => sum + r.capacity, 0));
+            const activeReportsCount = computed(() => reports.value.filter(r => r.status !== 'Resolved').length);
 
-            const addRoom = () => {
-                rooms.value.push({...newRoom.value});
-                localStorage.setItem('rooms', JSON.stringify(rooms.value));
-                newRoom.value = { name: '', rate: '' };
-            };
+            const topDueTenants = computed(() => {
+                return [...tenants.value]
+                    .map(t => ({ ...t, due: calculateDue(t), roomName: getRoomName(t.roomId), moveInDate: t.startDate }))
+                    .sort((a, b) => b.due - a.due)
+                    .slice(0, 4);
+            });
 
-            return { session, activeTab, loginForm, rooms, tenants, newRoom, login, logout, addRoom };
-        }
-    }).mount('#app');
-</script>
+            const availableRooms = computed(() => {
+                return rooms.value.map(r => ({
+                    ...r,
+                    openSpaces: r.capacity - getOccupancy(r.id)
+                })).filter(r => r.status !== 'Maintenance' && r.openSpaces > 0);
+            });
 
-</body>
-</html>            const tenants = ref(JSON.parse(localStorage.getItem('tenants') || '[]'));
-            const newRoom = ref({ name: '', rate: '' });
+            const tenantAccounts = computed(() => accounts.value.filter(a => a.role === 'tenant').map(a => {
+                const t = tenants.value.find(t => t.id === a.tenantId);
+                return { ...a, tenantName: t ? t.name : 'Unknown' };
+            }));
 
-            const login = () => {
-                if(loginForm.value.user === 'admin' && loginForm.value.pass === 'admin123') {
-                    session.value = true;
-                } else {
-                    alert('Invalid credentials');
-                }
-            };
+            const tenantsWithoutAccounts = computed(() => {
+                return tenants.value.filter(t => !accounts.value.some(a => a.tenantId === t.id));
+            });
 
-            const logout = () => { session.value = false; };
+            const myPayments = computed(() => payments.value.filter(p => p.tenantId === session.value.tenant.id));
+            const myReports = computed(() => reports.value.filter(r => r.tenantId === session.value.tenant.id));
+            const tenantSchedules = computed(() => schedules.value.filter(s => s.visibleToTenants).sort((a,b) => a.date.localeCompare(b.date)));
 
-            const addRoom = () => {
-                rooms.value.push({...newRoom.value});
-                localStorage.setItem('rooms', JSON.stringify(rooms.value));
-                newRoom.value = { name: '', rate: '' };
-            };
+            // Calendar logic
+            const activeMonthYear = computed(() => {
+                const d = new Date(2026, 4); // May 2026 as in screenshot
+                return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            });
 
-            return { session, activeTab, loginForm, rooms, tenants, newRoom, login, logout, addRoom };
-        }
-    }).mount('#app');
-</script>
-
-</body>
-</html>                </div>
-                <button type="submit" class="btn-primary w-full py-4 text-lg">Sign In</button>
-            </form>
-            <div class="mt-6 text-xs text-stone-400 text-center">
-                Default Admin: admin / admin123
-            </div>
-        </div>
-    </div>
-
-<?php else: ?>
-    <!-- APP SHELL -->
-    <div class="flex min-h-screen">
-        <!-- Sidebar -->
-        <aside class="w-72 bg-white/50 backdrop-blur-xl border-r border-stone-200 p-6 no-print hidden lg:block">
-            <div class="bg-stone-950 p-6 rounded-[2rem] text-white mb-8">
-                <p class="text-[10px] uppercase tracking-widest opacity-50"><?php echo strtoupper($user['role']); ?> PORTAL</p>
-                <h2 class="text-xl font-bold mt-2 leading-tight"><?php echo $property['name']; ?></h2>
-            </div>
-            
-            <nav class="space-y-2">
-                <?php 
-                $tabs = $user['role'] === 'admin' 
-                    ? ['Overview', 'Tenants', 'Rooms', 'Payments', 'Reports'] 
-                    : ['Dashboard', 'Payments', 'Reports'];
+            const calendarDays = computed(() => {
+                const year = 2026;
+                const month = 4; // May (0-indexed)
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
                 
-                foreach ($tabs as $t): ?>
-                    <a href="?tab=<?php echo $t; ?>" class="block px-5 py-3 rounded-2xl font-semibold <?php echo $page === $t ? 'bg-amber-800 text-white' : 'hover:bg-white text-stone-600'; ?>">
-                        <?php echo $t; ?>
-                    </a>
-                <?php endforeach; ?>
-            </nav>
+                const days = [];
+                // Padding
+                for(let i=0; i<firstDay; i++) days.push({ current: false });
+                
+                for(let d=1; d<=daysInMonth; d++) {
+                    const dateStr = `2026-05-${String(d).padStart(2, '0')}`;
+                    days.push({
+                        dayNum: d,
+                        current: true,
+                        date: dateStr,
+                        isToday: dateStr === '2026-05-14',
+                        events: schedules.value.filter(s => s.date === dateStr)
+                    });
+                }
+                return days;
+            });
 
-            <div class="absolute bottom-8 left-6 right-6">
-                <form method="POST">
-                    <input type="hidden" name="action" value="logout">
-                    <button class="w-full border border-stone-200 py-3 rounded-2xl font-semibold text-stone-600 hover:bg-white transition">Log Out</button>
-                </form>
-            </div>
-        </aside>
+            // Methods
+            const setDemo = (role) => {
+                loginRole.value = role;
+                loginForm.value = role === 'admin' 
+                    ? { username: 'admin', password: 'admin123' }
+                    : { username: 'ana', password: 'tenant123' };
+            };
 
-        <!-- Main Content -->
-        <main class="flex-1 p-6 lg:p-10">
-            <header class="mb-10 no-print">
-                <p class="text-amber-800 font-bold uppercase tracking-widest text-sm"><?php echo $page; ?></p>
-                <h1 class="text-4xl font-black mt-2">Welcome, <?php echo $user['username']; ?></h1>
-            </header>
+            const handleLogin = () => {
+                const acc = accounts.value.find(a => 
+                    a.username === loginForm.value.username && 
+                    a.password === loginForm.value.password && 
+                    a.role === loginRole.value
+                );
+                
+                if (acc) {
+                    const tenant = acc.tenantId ? tenants.value.find(t => t.id === acc.tenantId) : null;
+                    session.value = { ...acc, account: acc, tenant };
+                    activeTab.value = acc.role === 'admin' ? 'Overview' : 'Dashboard';
+                    loginError.value = '';
+                } else {
+                    loginError.value = 'No matching account found. Try the demo credentials shown in the form.';
+                }
+            };
 
-            <?php if ($page === 'Overview' && $user['role'] === 'admin'): ?>
-                <!-- ADMIN OVERVIEW -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                    <div class="bg-white p-8 rounded-[2rem] shadow-sm">
-                        <p class="text-stone-500 font-semibold">Total Tenants</p>
-                        <p class="text-4xl font-black mt-2"><?php echo count($tenants); ?></p>
-                    </div>
-                    <div class="bg-white p-8 rounded-[2rem] shadow-sm">
-                        <p class="text-stone-500 font-semibold">Available Rooms</p>
-                        <?php 
-                        $avail = array_filter($rooms, fn($r) => $r['status'] === 'Available');
-                        ?>
-                        <p class="text-4xl font-black mt-2"><?php echo count($avail); ?></p>
-                    </div>
-                    <div class="bg-white p-8 rounded-[2rem] shadow-sm">
-                        <p class="text-stone-500 font-semibold">Open Reports</p>
-                        <?php 
-                        $openR = array_filter($reports, fn($r) => $r['status'] === 'Open');
-                        ?>
-                        <p class="text-4xl font-black mt-2 text-rose-600"><?php echo count($openR); ?></p>
-                    </div>
-                </div>
+            const logout = () => {
+                session.value = null;
+                loginForm.value = { username: '', password: '' };
+            };
 
-                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm">
-                    <h3 class="text-xl font-bold mb-6">Recent Payments</h3>
-                    <table class="w-full text-left">
-                        <thead>
-                            <tr class="text-stone-400 text-xs uppercase tracking-widest">
-                                <th class="pb-4">Tenant</th>
-                                <th class="pb-4">Amount</th>
-                                <th class="pb-4">Status</th>
-                                <th class="pb-4">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-stone-100">
-                            <?php foreach ($payments as $p): ?>
-                                <tr>
-                                    <td class="py-4 font-semibold"><?php echo $p['tenant_name']; ?></td>
-                                    <td class="py-4"><?php echo formatMoney($p['amount']); ?></td>
-                                    <td class="py-4">
-                                        <span class="px-3 py-1 rounded-full text-xs font-bold <?php echo $p['status'] === 'Verified' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'; ?>">
-                                            <?php echo $p['status']; ?>
-                                        </span>
-                                    </td>
-                                    <td class="py-4">
-                                        <?php if ($p['status'] === 'Pending'): ?>
-                                            <form method="POST">
-                                                <input type="hidden" name="action" value="verify_payment">
-                                                <input type="hidden" name="id" value="<?php echo $p['id']; ?>">
-                                                <button class="text-sm font-bold text-amber-800">Verify</button>
-                                            </form>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
+            const formatCurrency = (val) => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(val);
+            const formatDateShort = (str) => new Date(str).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            
+            const getBillingMonths = (startDate) => {
+                const start = new Date(startDate);
+                const current = new Date('2026-05-14'); // System date from screenshot
+                const diff = (current.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 30.44);
+                return Math.max(1, Math.ceil(diff));
+            };
 
-            <?php elseif ($page === 'Tenants' && $user['role'] === 'admin'): ?>
-                <!-- TENANT MANAGEMENT -->
-                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm mb-10">
-                    <h3 class="text-xl font-bold mb-6">Register New Tenant</h3>
-                    <form method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <input type="hidden" name="action" value="add_tenant">
-                        <input type="text" name="name" placeholder="Full Name" class="input" required>
-                        <input type="email" name="email" placeholder="Email" class="input" required>
-                        <input type="text" name="phone" placeholder="Phone" class="input">
-                        <select name="room_id" class="input">
-                            <?php foreach ($rooms as $r): if ($r['status'] === 'Available'): ?>
-                                <option value="<?php echo $r['id']; ?>"><?php echo $r['name']; ?> (<?php echo formatMoney($r['monthly_rate']); ?>)</option>
-                            <?php endif; endforeach; ?>
-                        </select>
-                        <input type="date" name="start_date" class="input" value="<?php echo date('Y-m-d'); ?>">
-                        <input type="number" name="monthly_rent" placeholder="Agreed Rent" class="input" required>
-                        <button type="submit" class="btn-primary md:col-span-3">Register Tenant</button>
-                    </form>
-                </div>
+            const getNextDueDate = (startDate) => {
+                const start = new Date(startDate);
+                const next = new Date(start);
+                next.setMonth(next.getMonth() + getBillingMonths(startDate));
+                return formatDateShort(next);
+            };
 
-            <?php elseif ($page === 'Dashboard' && $user['role'] === 'tenant'): ?>
-                <!-- TENANT DASHBOARD -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-stone-950 text-white p-8 rounded-[2.5rem]">
-                        <p class="opacity-50 text-sm uppercase tracking-widest">Current Balance</p>
-                        <?php 
-                        $months = getBillingMonths($tenant['start_date']);
-                        $total_due = $months * $tenant['monthly_rent'];
-                        
-                        $stmt = $pdo->prepare("SELECT SUM(amount) FROM payments WHERE tenant_id = ? AND status = 'Verified'");
-                        $stmt->execute([$tenant['id']]);
-                        $paid = $stmt->fetchColumn() ?: 0;
-                        
-                        $balance = $total_due - $paid;
-                        ?>
-                        <h2 class="text-5xl font-black mt-4"><?php echo formatMoney($balance); ?></h2>
-                        <p class="mt-4 opacity-70">Total billing for <?php echo $months; ?> month(s).</p>
-                    </div>
+            const calculateDue = (t) => {
+                const months = getBillingMonths(t.startDate);
+                const totalCharged = months * t.monthlyRent;
+                const paid = getVerifiedPaid(t.id);
+                return Math.max(0, totalCharged - paid);
+            };
 
-                    <div class="bg-white p-8 rounded-[2.5rem]">
-                        <h3 class="text-xl font-bold mb-4">Submit Payment Notice</h3>
-                        <form method="POST" class="space-y-4">
-                            <input type="hidden" name="action" value="add_payment">
-                            <input type="hidden" name="tenant_id" value="<?php echo $tenant['id']; ?>">
-                            <input type="number" name="amount" placeholder="Amount" class="input" required>
-                            <select name="method" class="input">
-                                <option>GCash</option>
-                                <option>Cash</option>
-                                <option>Bank Transfer</option>
-                            </select>
-                            <input type="text" name="reference" placeholder="Reference Number" class="input">
-                            <button type="submit" class="btn-primary w-full">Submit Payment</button>
-                        </form>
-                    </div>
-                </div>
-            <?php endif; ?>
-        </main>
-    </div>
-<?php endif; ?>
+            const getVerifiedPaid = (tenantId) => payments.value.filter(p => p.tenantId === tenantId && p.status === 'Verified').reduce((sum, p) => sum + p.amount, 0);
+            const getPendingPaid = (tenantId) => payments.value.filter(p => p.tenantId === tenantId && p.status === 'Pending').reduce((sum, p) => sum + p.amount, 0);
+
+            const getRoomName = (id) => rooms.value.find(r => r.id === id)?.name || 'N/A';
+            const getOccupancy = (id) => tenants.value.filter(t => t.roomId === id).length;
+            const getTenantsInRoom = (id) => tenants.value.filter(t => t.roomId === id);
+            
+            const getRevenueByMethod = (method) => payments.value.filter(p => p.status === 'Verified' && p.method === method).reduce((sum, p) => sum + p.amount, 0);
+            const getRevenuePercent = (method) => {
+                const total = stats.value.verifiedRevenue;
+                if(total === 0) return 0;
+                return (getRevenueByMethod(method) / total) * 100;
+            };
+
+            const getRoomStatusColor = (r) => {
+                if (r.status === 'Occupied') return 'text-sky-700 bg-sky-50 border-sky-100';
+                if (r.status === 'Available') return 'text-emerald-700 bg-emerald-50 border-emerald-100';
+                return 'text-amber-700 bg-amber-50 border-amber-100';
+            };
+
+            // CRUD Operations
+            const registerTenant = () => {
+                if(!tenantForm.value.name || !tenantForm.value.roomId) return;
+                const id = tenants.value.length ? Math.max(...tenants.value.map(t => t.id)) + 1 : 1;
+                tenants.value.push({ ...tenantForm.value, id });
+                tenantForm.value = { name: '', email: '', phone: '', startDate: '', monthlyRent: 0, roomId: null };
+            };
+
+            const deleteTenant = (id) => {
+                if(confirm('Delete this tenant?')) tenants.value = tenants.value.filter(t => t.id !== id);
+            };
+
+            const transferTenant = () => {
+                const t = tenants.value.find(t => t.id === transferForm.value.tenantId);
+                if(t) t.roomId = transferForm.value.roomId;
+            };
+
+            const addRoom = () => {
+                const id = rooms.value.length ? Math.max(...rooms.value.map(r => r.id)) + 1 : 1;
+                rooms.value.push({ ...roomForm.value, id });
+                roomForm.value = { number: '', name: '', type: '', rate: 0, capacity: 0, inclusions: '', status: 'Available' };
+            };
+
+            const deleteRoom = (id) => {
+                if(confirm('Delete this room?')) rooms.value = rooms.value.filter(r => r.id !== id);
+            };
+
+            const verifyPayment = (id) => {
+                const p = payments.value.find(p => p.id === id);
+                if(p) p.status = 'Verified';
+            };
+
+            const deletePayment = (id) => {
+                if(confirm('Delete payment record?')) payments.value = payments.value.filter(p => p.id !== id);
+            };
+
+            const addSchedule = () => {
+                const id = schedules.value.length ? Math.max(...schedules.value.map(s => s.id)) + 1 : 1;
+                schedules.value.push({ ...scheduleForm.value, id });
+                scheduleForm.value = { title: '', category: 'Reminder', time: '09:00', date: '', details: '', visibleToTenants: true };
+            };
+
+            const deleteReport = (id) => {
+                if(confirm('Delete this report?')) reports.value = reports.value.filter(r => r.id !== id);
+            };
+
+            const createAccount = () => {
+                const id = accounts.value.length ? Math.max(...accounts.value.map(a => a.id)) + 1 : 1;
+                accounts.value.push({ ...accountForm.value, id, role: 'tenant' });
+                accountForm.value = { tenantId: null, username: '', password: '' };
+            };
+
+            const loadEditingAccount = () => {
+                const a = accounts.value.find(a => a.id === editingAccount.value);
+                if(a) accountEditForm.value = { username: a.username, password: a.password };
+            };
+
+            const updateAccount = () => {
+                const a = accounts.value.find(a => a.id === editingAccount.value);
+                if(a) {
+                    a.username = accountEditForm.value.username;
+                    a.password = accountEditForm.value.password;
+                    alert('Updated successfully');
+                }
+            };
+
+            const deleteAccount = (id) => {
+                if(confirm('Delete user account?')) accounts.value = accounts.value.filter(a => a.id !== id);
+            };
+
+            const submitPayment = () => {
+                const id = payments.value.length ? Math.max(...payments.value.map(p => p.id)) + 1 : 1;
+                payments.value.push({
+                    id,
+                    tenantId: session.value.tenant.id,
+                    tenantName: session.value.tenant.name,
+                    amount: paymentForm.value.amount,
+                    method: paymentForm.value.method,
+                    reference: paymentForm.value.reference,
+                    date: '2026-05-14',
+                    status: 'Pending'
+                });
+                paymentForm.value = { amount: 0, method: 'GCash', reference: '' };
+                alert('Payment notice sent for verification');
+            };
+
+            const submitReport = () => {
+                const id = reports.value.length ? Math.max(...reports.value.map(r => r.id)) + 1 : 1;
+                reports.value.push({
+                    id,
+                    tenantId: session.value.tenant.id,
+                    tenantName: session.value.tenant.name,
+                    roomName: getRoomName(session.value.tenant.roomId),
+                    ...reportForm.value,
+                    date: '2026-05-14',
+                    status: 'Open'
+                });
+                reportForm.value = { category: 'Maintenance', title: '', details: '' };
+                alert('Report submitted');
+            };
+
+            const updateProfile = () => {
+                alert('Profile updated');
+            };
+
+            const saveProperty = () => alert('Property profile saved');
+            const saveRooms = () => saveData('rooms', rooms.value);
+            const saveReports = () => saveData('reports', reports.value);
+
+            return {
+                session, activeTab, loginRole, loginForm, loginError,
+                property, rooms, tenants, accounts, payments, schedules, reports,
+                tenantForm, roomForm, transferForm, scheduleForm, accountForm, accountEditForm, editingAccount, reportForm, paymentForm,
+                stats, occupiedSpaceCount, totalCapacity, activeReportsCount, topDueTenants, availableRooms, tenantAccounts, tenantsWithoutAccounts,
+                myPayments, myReports, tenantSchedules, activeMonthYear, calendarDays,
+                handleLogin, logout, setDemo, today, formatCurrency, formatDateShort, 
+                getBillingMonths, getNextDueDate, calculateDue, getVerifiedPaid, getPendingPaid,
+                getRoomName, getOccupancy, getTenantsInRoom, getRevenueByMethod, getRevenuePercent, getRoomStatusColor,
+                registerTenant, deleteTenant, transferTenant, addRoom, deleteRoom, verifyPayment, deletePayment, 
+                addSchedule, deleteReport, createAccount, loadEditingAccount, updateAccount, deleteAccount, 
+                submitPayment, submitReport, updateProfile, saveProperty, saveRooms, saveReports
+            };
+        }
+    }).mount('#app');
+</script>
 
 </body>
 </html>
