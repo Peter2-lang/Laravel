@@ -170,6 +170,31 @@
 </script>
 
 </body>
+</html>            const tenants = ref(JSON.parse(localStorage.getItem('tenants') || '[]'));
+            const newRoom = ref({ name: '', rate: '' });
+
+            const login = () => {
+                if(loginForm.value.user === 'admin' && loginForm.value.pass === 'admin123') {
+                    session.value = true;
+                } else {
+                    alert('Invalid credentials');
+                }
+            };
+
+            const logout = () => { session.value = false; };
+
+            const addRoom = () => {
+                rooms.value.push({...newRoom.value});
+                localStorage.setItem('rooms', JSON.stringify(rooms.value));
+                newRoom.value = { name: '', rate: '' };
+            };
+
+            return { session, activeTab, loginForm, rooms, tenants, newRoom, login, logout, addRoom };
+        }
+    }).mount('#app');
+</script>
+
+</body>
 </html>                </div>
                 <button type="submit" class="btn-primary w-full py-4 text-lg">Sign In</button>
             </form>
